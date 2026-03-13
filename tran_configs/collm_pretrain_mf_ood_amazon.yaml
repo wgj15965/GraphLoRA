@@ -1,0 +1,99 @@
+model:
+  arch: mini_gpt4rec_v2
+  model_type: pretrain_vicuna
+  freeze_rec: True
+  freeze_proj: True  # stage 1: proj false, lora: false
+  freeze_lora: False #  sateg2: proj true, lora false
+  max_txt_len: 1024
+  proj_token_num: 1
+  proj_drop: 0
+  proj_mid_times: 10
+  end_sym: "###"
+  prompt_path: "prompts/collm_amazon.txt"
+  # prompt_template: '### Input: {} \n### Response:'
+  prompt_template: '{}'
+  llama_model: "/mnt/disk2/wgj/wgj_collm/vicuna-7b-v1.1"
+  user_num: -100
+  item_num: -100
+  lora_gnn: "ngcf"  # 'lightgcn', 'ngcf', 'graphsage', 'gat' , 'gcn'
+  lora_scale: 1.0
+  gnn_scale: 0
+  gcn_layer: 15
+  dataset : book
+  ans_type: 'v2'
+  lora_config:
+    use_lora: True
+    r: 8
+    alpha: 16
+    target_modules: ["q_proj", "v_proj"] # ,"o_proj" , "gate_proj", "up_proj" , "down_proj" ,"k_proj" #
+    dropout: 0.05
+  rec_config:
+    user_num: -100
+    item_num: -100
+    embedding_size: 256
+    pretrained_path: /mnt/disk2/wgj/wgj_collm/weight_best/0923_book_oodv2_best_model_d256lr-0.001wd1e-06.pth
+#    /mnt/disk2/wgj/wgj_collm/weight_best/0923_book_oodv2_best_model_d256lr-0.001wd1e-06.pth
+
+  
+  ckpt: /mnt/disk2/wgj/wgj_collm/CoRA/book/book_collm_1217/20251217162/checkpoint_best.pth
+   #/mnt/disk2/wgj/wgj_collm/weight_best/tallrec_book_best_32000.pth
+
+  
+
+datasets:
+  amazon_ood:
+    # path: /home/sist/zyang/LLM/MiniGPT-4/dataset/ml-100k/  #"~/LLM/MiniGPT-4/dataset/ml-100k/"
+    path: /mnt/disk2/wgj/wgj_collm/collm-datasets/amazon_book/book/
+    train_file: train_ood2.pkl
+    val_file: valid_ood2.pkl
+    test_file: test_ood2.pkl
+    # path: "~/LLM/MiniGPT-4/dataset/ml-1m/"` 
+    # path: /home/sist/zyang/LLM/datasets/ml-1m
+    data_type: default
+    build_info:
+      # storage: /path/to/cc_sbu_dataset/{00000..01255}.tar
+      # storage: /home/sist/zyang/LLM/MiniGPT-4/dataset/ml-100k/ #~/LLM/MiniGPT-4/dataset/ml-100k/
+      storage: /mnt/disk2/wgj/wgj_collm/collm-datasets/amazon_book/book/
+      # storage: /home/sist/zyang/LLM/datasets/ml-1m/
+
+run:
+  task: rec_pretrain
+  # optimizer
+  lr_sched: "linear_warmup_cosine_lr"  # "linear_warmup_step_lr"
+  # init_lr: 1e-4
+  # min_lr: 8e-5c
+  init_lr: 1e-4
+  min_lr: 8e-5
+  warmup_lr: 1e-5
+  # init_lr: 3e-5
+  # min_lr: 1e-5
+  # warmup_lr: 1e-6
+  mode: 'v2'
+
+  weight_decay: 1e-3 #1e-3 #0.05
+  max_epoch: 200
+  iters_per_epoch: 1000 #100 #50 #200
+  batch_size_train: 1 #48
+  batch_size_eval: 16 #48
+  eval_interval: 50
+  num_workers: 0
+  warmup_steps: 200 #200
+
+  seed: 42   #42
+  # output_dir: "output"
+  output_dir: /mnt/disk2/wgj/wgj_collm/CoRA/book/book_collm_1217
+  # output_dir: "home/zyang/LLM/minigpt4recLog/minigpt4rec_finetune"
+
+  amp: True
+  resume_ckpt_path: null
+
+  evaluate: False #False
+  train_splits: ["train"]
+  valid_splits: ["valid"]
+#  test_splits: ["test_warm", "test_cold", "test", "valid"]
+  test_splits: ["test" ,  "test_warm", "test_cold"]   #"valid"
+
+  device: "cuda"
+  world_size: 2
+  dist_url: "env://"
+  distributed: True
