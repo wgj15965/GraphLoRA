@@ -9,7 +9,7 @@ recommendation tasks.
 
 ## Overview
 
-![](C:\Users\饭团子\AppData\Roaming\marktext\images\2026-06-23-23-50-59-image.png)
+
 
 Existing LLM4Rec methods typically inject collaborative signals only at the
 input token layer (e.g., replacing `<UserID>` / `<ItemID>` placeholders with
